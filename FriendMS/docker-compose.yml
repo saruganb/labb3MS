@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  mysql-friend-ms:
+    image: "mysql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=FriendSM
+    ports:
+      - "3309:3306"
+  Friend-MS-Container:
+    image: friendms:latest
+    ports:
+      - "8001:8001"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-friend-ms:3306/FriendSM?autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "root"
+    build:
+      context: "./"
+      dockerfile: "Dockerfile"
+    depends_on:
+      - mysql-friend-ms

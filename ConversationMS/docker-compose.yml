@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  mysql-conversation-ms:
+    image: "mysql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=ConversationSM
+    ports:
+      - "3310:3306"
+  Conversation-MS-Container:
+    image: conversationms:latest
+    ports:
+      - "8004:8004"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-conversation-ms:3306/ConversationSM?autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "root"
+    build:
+      context: "./"
+      dockerfile: "Dockerfile"
+    depends_on:
+      - mysql-conversation-ms

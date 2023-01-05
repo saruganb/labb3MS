@@ -1,0 +1,32 @@
+version: '3.4'
+services:
+  vertx-db:
+    container_name: vertx-database
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: theUser
+      MONGO_INITDB_ROOT_PASSWORD: pass
+
+    ports:
+      - '27018:27017'
+
+  vertx-ms:
+    container_name: vertx-server
+    build:
+      context: ./
+      dockerfile: Dockerfile
+
+    links:
+      - vertx-db
+    ports:
+      - '8888:8888'
+
+    environment:
+      DB_HOST: vertx-database
+      DB_PORT: 27017
+      DB_USER: 'theUser'
+      DB_PASSWORD: 'pass'
+      DB_NAME: GraphDb
+
+    depends_on:
+      - vertx-db

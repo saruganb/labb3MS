@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  mysql-whiteboard-ms:
+    image: mysql
+    command: --authentication_policy=mysql_native_password
+    restart: always
+    environment:
+        MYSQL_DATABASE : whiteboardSM
+        MYSQL_ROOT_PASSWORD : root
+        MYSQL_USER: whiteboardUser
+        MYSQL_PASSWORD: passMS
+    ports:
+      - "3311:3306"
+  whiteboard-ms-container:
+    restart: always
+    image: whiteboardms:latest
+    ports:
+      - "2000:2000"
+    environment:
+        DB_HOST: mysql-whiteboard-ms
+        DB_PORT: 3306
+        DB_USER: 'whiteboardUser'
+        DB_PASSWORD: 'passMS'
+        DB_NAME: whiteboardSM
+    build:
+      context: "./"
+      dockerfile: "Dockerfile"
+    depends_on:
+      - mysql-whiteboard-ms
+

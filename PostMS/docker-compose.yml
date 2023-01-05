@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  mysql-post-ms:
+    image: "mysql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=PostSM
+    ports:
+      - "3308:3306"
+  Post-MS-Container:
+    image: postms:latest
+    ports:
+      - "8002:8002"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-post-ms:3306/PostSM?autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "root"
+    build:
+      context: "./"
+      dockerfile: "Dockerfile"
+    depends_on:
+      - mysql-post-ms
