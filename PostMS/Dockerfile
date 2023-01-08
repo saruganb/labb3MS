@@ -10,8 +10,8 @@ ENV USER_MS_API_URL=registry.kthcloud.com/data-ht2022/data1-api1/api/v1
 
 WORKDIR /app
 
-COPY pom.xml ./
+COPY PostMS/pom.xml .
 
-COPY src ./src
+COPY PostMS/src .
 
 CMD mvn spring-boot:run
