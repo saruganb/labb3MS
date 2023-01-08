@@ -26,5 +26,6 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v3
         with:
+          file: ConversationMS/Dockerfile
           push: true
           tags: registry.kthcloud.com/data-ht2022/data1-api4:latest
