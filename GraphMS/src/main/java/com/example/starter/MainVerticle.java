@@ -31,7 +31,17 @@ public class MainVerticle extends AbstractVerticle {
   public void start() throws Exception {
     // Create a Router
     Router router = Router.router(vertx);
-    router.route().handler(CorsHandler.create("http://localhost:3000"));
+    router.route().handler(CorsHandler.create("http://localhost:3000")
+      .allowedMethod(io.vertx.core.http.HttpMethod.GET)
+      .allowedMethod(io.vertx.core.http.HttpMethod.POST)
+      .allowedMethod(io.vertx.core.http.HttpMethod.PUT)
+      .allowedMethod(io.vertx.core.http.HttpMethod.DELETE)
+      .allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS)
+      .allowedHeader("Access-Control-Request-Method")
+      .allowedHeader("Access-Control-Allow-Credentials")
+      .allowedHeader("Access-Control-Allow-Origin")
+      .allowedHeader("Access-Control-Allow-Headers")
+      .allowedHeader("Content-Type"));
     router
       .route("/")
       .handler(routingContext -> {
@@ -41,15 +51,18 @@ public class MainVerticle extends AbstractVerticle {
           .end("<h1>Hello from Vert.x 3 application</h1>");
       });
     router
-      .route(HttpMethod.POST, "/addDoc/:id/:graphName")
+      .route(HttpMethod.POST, "/addDoc/:id/:graphName/:graphType")
       .handler(routingContext -> {
         List<Object> obj = new ArrayList<>();
-        Long userId = Long.parseLong(routingContext.pathParam("id"));
+        String userId = routingContext.pathParam("id");
         String graphName = routingContext.pathParam("graphName");
+        String graphType = routingContext.pathParam("graphType");
         JsonObject query1 = new JsonObject()
           .put("userId", userId)
-          .put("graphName", graphName);
+          .put("graphName", graphName)
+          .put("graphType", graphType);
         routingContext.request().bodyHandler(bodyHandler -> {
+          System.out.println(bodyHandler.toJson());
           obj.add(bodyHandler.toJson());
         });
         mongoClient.find("userGraph", query1, res -> {
@@ -59,6 +72,7 @@ public class MainVerticle extends AbstractVerticle {
               JsonObject document = new JsonObject()
                 .put("userId", userId)
                 .put("graphName", graphName)
+                .put("graphType", graphType)
                 .put("values", obj.get(0));
               mongoClient.insert("userGraph", document, res2 -> {
                 if (res2.succeeded()) {
@@ -68,9 +82,9 @@ public class MainVerticle extends AbstractVerticle {
                   res2.cause().printStackTrace();
                 }
               });
-              routingContext.response().end();
+              routingContext.response().ended();
           } else {
-            routingContext.response().end();
+            routingContext.response().ended();
             System.out.println("GraphName already used");
             res.cause().printStackTrace();
           }
@@ -99,7 +113,7 @@ public class MainVerticle extends AbstractVerticle {
     router
       .route(HttpMethod.GET, "/getDoc/:id/:graphName")
       .handler(routingContext -> {
-          Long userId = Long.parseLong(routingContext.pathParam("id"));
+          String userId = routingContext.pathParam("id");
           String graphName = routingContext.pathParam("graphName");
           JsonObject query = new JsonObject()
             .put("userId", userId)
@@ -122,7 +136,7 @@ public class MainVerticle extends AbstractVerticle {
     router
       .route(HttpMethod.DELETE, "/deleteDoc/:id/:graphName")
       .handler(routingContext -> {
-        Long userId = Long.parseLong(routingContext.pathParam("id"));
+        String userId = routingContext.pathParam("id");
         String graphName = routingContext.pathParam("graphName");
         JsonObject query = new JsonObject()
           .put("userId", userId)
@@ -130,17 +144,17 @@ public class MainVerticle extends AbstractVerticle {
         mongoClient.removeDocument("userGraph", query, res -> {
           if (res.succeeded()) {
             System.out.println("Document removed");
-            routingContext.response().end();
           } else {
             res.cause().printStackTrace();
           }
+          routingContext.response().ended();
         });
       });
 
     router
       .route(HttpMethod.GET, "/getAllMyDocs/:id")
       .handler(routingContext -> {
-        Long userId = Long.parseLong(routingContext.pathParam("id"));
+        String userId = routingContext.pathParam("id");
           JsonObject query = new JsonObject()
             .put("userId", userId);
           mongoClient.find("userGraph", query, res -> {
@@ -153,11 +167,6 @@ public class MainVerticle extends AbstractVerticle {
                 //System.out.println(json.encodePrettily());
               }
               routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
-                .putHeader("Access-Control-Allow-Origin", "http://localhost:3000")
-                .putHeader("Access-Control-Allow-Credentials", "true")
-                .putHeader("Access-Control-Allow-Methods", "GET")
-                //.putHeader("Access-Control-Allow-Headers", "Content-Type")
                 .end(Json.encodePrettily(list));
             } else {
               res.cause().printStackTrace();
@@ -167,64 +176,53 @@ public class MainVerticle extends AbstractVerticle {
     router
       .route(HttpMethod.PUT, "/insertDataIntoGraph/:id/:graphName")
         .handler(routingContext -> {
-          System.out.println("n");
-          Long userId = Long.parseLong(routingContext.pathParam("id"));
+          String userId = routingContext.pathParam("id");
           String graphName = routingContext.pathParam("graphName");
-          //StringBuilder sb = new StringBuilder();
-          List<Object> obj = new ArrayList<>();
+          List<JsonArray> obj = new ArrayList<>();
           JsonObject query1 = new JsonObject()
             .put("userId", userId)
             .put("graphName", graphName);
           routingContext.request().bodyHandler(bodyHandler -> {
-            //sb.append(bodyHandler.toJson());
-            //sb.deleteCharAt(0);
-            StringBuilder str = new StringBuilder();
-            str.append(bodyHandler.toString());
-            str.deleteCharAt(0);
-            str.deleteCharAt(str.length()-1);
-            System.out.println(str);
-            JsonObject jsonObject = new JsonObject(str.toString());
-            obj.add(jsonObject);
-            System.out.println(obj.get(0));
+            obj.add(bodyHandler.toJsonArray());
           });
           mongoClient.find("userGraph", query1, res -> {
             if (res.succeeded()) {
-              System.out.println(obj.get(0));
               JsonObject query2 = new JsonObject()
                 .put("userId", userId)
                 .put("graphName", graphName);
               JsonObject update = new JsonObject().put("$push", new JsonObject()
-                .put("values", obj.get(0)));
+                .put("values", obj.get(0).getValue(0)));
               mongoClient.updateCollection("userGraph", query2, update, res2 -> {
                 if (res2.succeeded()) {
                   System.out.println("Updated!");
-                  routingContext.response().end();
+
+                  //routingContext.response()
+                  //.putHeader("content-type", "application/json; charset=utf-8")
+                  //.putHeader("Access-Control-Allow-Origin", "http://localhost:3000")
+                  //.putHeader("Access-Control-Allow-Credentials", "true")
+                  //.putHeader("Access-Control-Allow-Methods", "PUT")
+                  //.end();
                 } else {
                   res2.cause().printStackTrace();
                 }
-              /*System.out.println("s");
-              StringBuilder str = new StringBuilder();
-              str.append(res.result().get(0).getJsonArray("values").encode());
-              str.deleteCharAt(str.indexOf("]"));
-              str.append(",").append(sb);
-              System.out.println(str);
-              JsonObject obj = new JsonObject(str.toString());
-              System.out.println(obj);
-              JsonObject query2 = new JsonObject()
-                .put("userId", userId)
-                .put("graphName", graphName);
-              JsonObject update = new JsonObject().put("$set", new JsonObject()
-                .put("values", obj));
-              mongoClient.updateCollection("userGraph", query2, update, res2 -> {
-                if (res2.succeeded()) {
-                  System.out.println("Updated!");
-                } else {
-                  res2.cause().printStackTrace();
-                }*/
-                //System.out.println(sb);
               });
-            } else {
-              res.cause().printStackTrace();
+              if(obj.get(0).size() > 1) {
+                for (int i = 1; i < obj.get(0).size(); i++) {
+                  JsonObject updates = new JsonObject().put("$push", new JsonObject()
+                    .put("values", obj.get(0).getValue(i)));
+                  mongoClient.updateCollection("userGraph", query2, updates, res3 -> {
+                    if (res3.succeeded()) {
+                      System.out.println("Updated!");
+                      //routingContext.response()
+                        //.end();
+                    } else {
+                      res3.cause().printStackTrace();
+                    }
+                });
+              }
+              }
+              System.out.println(routingContext.response().end(Json.encodePrettily(res.result())));
+              routingContext.response().ended();
             }
           });
         });
@@ -264,6 +262,7 @@ public class MainVerticle extends AbstractVerticle {
           });
         });*/
 
+    configureMongoClient();
     /*ConfigStoreOptions defaultConfig = new ConfigStoreOptions()
       .setFormat("json")
       .setConfig(new JsonObject().put("path", "http://localhost:27017/GraphDb"));*/
@@ -295,19 +294,15 @@ public class MainVerticle extends AbstractVerticle {
         "HTTP server started on port " + server.actualPort()
       )
     );
-    configureMongoClient();
   }
 
   Future<Void> configureMongoClient(){
     JsonObject mongo = new JsonObject()
-      //jdbc:mongodb:localhost:27017/GraphDb
-      .put("url", "jdbc:mongodb:localhost:27017/GraphDb")
       .put("db_name", "GraphDb")
-      .put("username", "theUser")
+      .put("url", "ac-jfjtte3-shard-00-01.4qlreuh.mongodb.net:27017")
+      .put("username", "user")
       .put("password", "pass");
-
     mongoClient = MongoClient.createShared(vertx, mongo);
-    //mongoClient.createCollection("userGraph");
     return Future.<Void>succeededFuture();
   }
 }

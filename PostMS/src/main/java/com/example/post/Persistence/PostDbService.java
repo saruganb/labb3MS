@@ -147,7 +147,7 @@ public class PostDbService {
 
     private List<User> getUserFriends(String id, String accessToken){
         try{
-            final String uri  = "http://localhost:8001/api/v1/getUserFriends/" + id;
+            final String uri  = "http://api3:8080/api/v1/getUserFriends/" + id;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -169,7 +169,7 @@ public class PostDbService {
 
     private User getUser(String id, String accessToken){
         try{
-            final String uri = "http://localhost:8003/api/v1/user/get/" + id;
+            final String uri = "http://api1:8080/api/v1/user/get/" + id;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -190,7 +190,7 @@ public class PostDbService {
 
     private void incrementPost(String userId, String accessToken){
         try{
-            final String uri = "http://localhost:8003/api/v1/user/incrementPost/" + userId;
+            final String uri = "http://api1:8080/api/v1/user/incrementPost/" + userId;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

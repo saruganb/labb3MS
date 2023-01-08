@@ -62,7 +62,7 @@ public class ConversationDbService {
 
     private boolean getUser(String id, String accessToken){
         try{
-            final String uri = "http://localhost:8003/api/v1/user/get/" + id;
+            final String uri = "http://api1:8080/api/v1/user/get/" + id;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

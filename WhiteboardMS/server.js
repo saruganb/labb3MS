@@ -20,11 +20,15 @@ let connectionName = ""
 //SQL
 
 const con = mysql.createConnection({
-    host:'localhost',
+    //host:'localhost',
     //host:'mysql-whiteboard-ms',
-    user:'whiteboardUser',
-    password:'passMS',
-    database:'whiteboardSM'
+    host: "api5-mysql",
+    port: "8080",
+    user: "whiteboardUser",
+    password: "passMS",
+    database: "whiteboardSM",
+    connectTimeout: 40000
+
 })
 con.connect(function(err) {
     if (err) throw err;

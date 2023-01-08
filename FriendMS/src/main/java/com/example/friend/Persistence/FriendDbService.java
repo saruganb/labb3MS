@@ -16,7 +16,6 @@ import java.util.Optional;
 @Service
 public class FriendDbService {
     private final FriendDbRepository friendDbRepository;
-
     @Autowired
     public FriendDbService(FriendDbRepository friendDbRepository){
         this.friendDbRepository = friendDbRepository;
@@ -165,7 +164,7 @@ public class FriendDbService {
 
     private User getUser(String id, String accessToken){
         try{
-            final String uri = "http://localhost:8003/api/v1/user/get/" + id;
+            final String uri = "http://api1:8080/api/v1/user/get/" + id;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -186,7 +185,7 @@ public class FriendDbService {
 
     private void incrementFriend(String userId, String accessToken){
         try{
-            final String uri = "http://localhost:8003/api/v1/user/incrementFriend/" + userId;
+            final String uri = "http://api1:8080/api/v1/user/incrementFriend/" + userId;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

@@ -6,8 +6,9 @@ let _keycloak;
 var keycloakConfig = {
     clientId: 'sm-frontend',
     bearerOnly: true,
-    serverUrl: 'http://localhost:8080/auth',
-    realm: 'SM-app',
+    serverUrl:"https://lemur-0.cloud-iam.com/auth/",
+    //serverUrl: 'http://localhost:8080/auth',
+    realm: 'sm-app',
 };
 
 function initKeycloak() {
