@@ -18,7 +18,7 @@ public class UserApplication {
 
     @GetMapping
     public String hello(){
-        return "Hello World User";
+        return "Hello World";
     }
 
 }
