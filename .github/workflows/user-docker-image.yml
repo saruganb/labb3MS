@@ -3,7 +3,7 @@ name: ci
 on:
   push:
     branches:
-      - 'main'
+      - 'User'
 
 jobs:
   docker:
@@ -26,5 +26,6 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v3
         with:
+          file: /UserMS/Dockerfile
           push: true
           tags: registry.kthcloud.com/data-ht2022/data1-api1:latest
