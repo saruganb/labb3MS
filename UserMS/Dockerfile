@@ -10,6 +10,6 @@ WORKDIR /app
 
 COPY pom.xml ./
 
-COPY src UserMS/src
+COPY UserMS/src .
 
 CMD mvn spring-boot:run
