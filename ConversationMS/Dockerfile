@@ -8,8 +8,8 @@ ENV SPRING_DATASOURCE_PASSWORD=root
 
 WORKDIR /app
 
-COPY pom.xml ./
+COPY ConversationMS/pom.xml .
 
-COPY src ./src
+COPY ConversationMS/src .
 
 CMD mvn spring-boot:run
