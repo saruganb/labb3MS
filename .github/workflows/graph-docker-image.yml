@@ -1,33 +1,31 @@
-name: Java CI with Maven
+name: ci
 
 on:
   push:
-    branches: [ Graph ]
-  workflow_dispatch:
+    branches:
+      - 'Graph'
 
 jobs:
-  build:
-
+  docker:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-      - name: Login to DockerHub
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           registry: registry.kthcloud.com
           username: robot$data-ht2022+shared
           password: Fupabaxo11
-      - name: Build and push
+      -
+        name: Build and push
         uses: docker/build-push-action@v3
         with:
+          file: /GraphMS/Dockerfile
           push: true
           tags: registry.kthcloud.com/data-ht2022/data1-api6:latest
-      - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots verify
