@@ -8,7 +8,7 @@ ENV SPRING_DATASOURCE_PASSWORD=root
 
 WORKDIR /app
 
-COPY pom.xml ./
+COPY UserMS/pom.xml .
 
 COPY UserMS/src .
 
